@@ -10,6 +10,7 @@ from updaug._loader import dataset_generator
 from updaug._trainstep import _build_discriminator_training_step
 from updaug._trainstep import _build_generator_training_step
 from updaug._models import build_generator, build_discriminator
+from updaug._loss import _l1_loss
 
 def _get_example_images(testdata, testlabels, outputshape):
     df = pd.DataFrame({"filepath":testdata, "label":testlabels})
@@ -127,10 +128,24 @@ class Trainer(object):
                 self._record_scalars(loss=loss)
                 self.step += 1
             
+            self.evaluate()
             if save:
                 self.save()
             self._visualize_outputs()
-    
+            
+    def evaluate(self):
+        loss = []
+        for x0, y0, x1, y1 in self.testds:
+            fake0 = self.models["generator"](x0, y1)
+            fake1 = self.models["generator"](x1, y0)
+            recon0 = self.models["generator"](fake0, y0)
+            recon1 = self.models["generator"](fake1, y1)
+            
+            recon_loss = 0.5*(_l1_loss(x0, recon0).numpy().mean() + \
+                              _l1_loss(x1, recon1).numpy().mean())
+            loss.append(recon_loss)
+        self._record_scalars(test_recon_loss=np.mean(recon_loss))
+        
     def save(self):
         """
         Write model(s) to disk
