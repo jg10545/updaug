@@ -4,6 +4,11 @@ import pandas as pd
 import tensorflow as tf
 
 
+def _random_rotate(x):
+    theta = tf.random.uniform(shape=[], minval=0, maxval=4, dtype=tf.int32)
+    return tf.image.rot90(x, theta)
+
+
 def distort(x, outputshape=(128,128)):
     """
     Wrapper for tf.raw_ops.ImageProjectiveTransform; scales, shears,
@@ -31,7 +36,8 @@ def distort(x, outputshape=(128,128)):
 
 
 def dataset_generator(filepaths, labels, pairs_per_epoch, num_parallel_calls=6,
-                      outputshape=(128,128), filetype="png", batch_size=64):
+                      outputshape=(128,128), filetype="png", batch_size=64,
+                      crop=False, flip=True, rot=False, seed=False):
     """
     Build a tensorflow dataset that generates pairs of distorted images
     :filepaths: list of strings; paths to all images
@@ -42,6 +48,9 @@ def dataset_generator(filepaths, labels, pairs_per_epoch, num_parallel_calls=6,
     :ouputshape: tuple; size of output images
     :filetype: whether to look for jpg or png images
     :batch_size:
+    :crop: if True, pull a random crop from each image instead of resizing
+    :flip:
+    :rot:
     """
     # organize files by domain- first 
     df = pd.DataFrame({"filepath":filepaths, "label":labels})
@@ -57,18 +66,28 @@ def dataset_generator(filepaths, labels, pairs_per_epoch, num_parallel_calls=6,
             decoded = tf.io.decode_jpeg(loaded)
         else:
             assert False, "don't know this file type"
-        resized = tf.image.resize(decoded, outputshape)
+        if crop:
+            resized = tf.image.random_crop(decoded, outputshape)
+        else:
+            resized = tf.image.resize(decoded, outputshape)
+        if flip:
+            resized = tf.image.random_flip_left_right(resized)
+        if rot:
+            resized = _random_rotate(resized)
         cast = tf.cast(resized, tf.float32)/255
         return distort(cast, outputshape)
     
     def _prep(p):
         img0 = _load_and_distort(p["file0"])
         img1 = _load_and_distort(p["file1"])
-        return img0, p["label0"], img1, p["label1"]
+        return img0, tf.one_hot(p["label0"], num_domains), \
+            img1, tf.one_hot(p["label1"], num_domains)
     
     
     while True:
         pairs = {"file0":[], "label0":[], "file1":[], "label1":[]}
+        if seed:
+            np.random.seed(seed)
         for _ in range(pairs_per_epoch):
             pairchoice = np.random.choice(np.arange(num_domains), replace=False, size=2)
             file0 = np.random.choice(subsets[pairchoice[0]])

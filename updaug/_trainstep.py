@@ -5,7 +5,7 @@ from updaug._loss import _l1_loss, _edge_loss
 
 
 def _build_generator_training_step(gen, disc, opt, lam1=1, lam2=10, lam3=10, lam4=100):
-    @tf.function
+    #@tf.function
     def trainstep(a, adom, b, bdom):
         lossdict = {}
         # a, b: [batch_size, H, W, num_channels]
