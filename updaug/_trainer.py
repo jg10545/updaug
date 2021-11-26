@@ -156,10 +156,10 @@ class Trainer(object):
     def evaluate(self):
         loss = []
         for x0, y0, x1, y1 in self.testds:
-            fake0 = self.models["generator"](x0, y1)
-            fake1 = self.models["generator"](x1, y0)
-            recon0 = self.models["generator"](fake0, y0)
-            recon1 = self.models["generator"](fake1, y1)
+            fake0 = self.models["generator"]([x0, y1])
+            fake1 = self.models["generator"]([x1, y0])
+            recon0 = self.models["generator"]([fake0, y0])
+            recon1 = self.models["generator"]([fake1, y1])
             
             recon_loss = 0.5*(_l1_loss(x0, recon0).numpy().mean() + \
                               _l1_loss(x1, recon1).numpy().mean())
@@ -181,7 +181,7 @@ class Trainer(object):
         for d in range(self.num_domains):
             output_domain = d*np.ones(N, dtype=np.int64)
             output_domain = tf.one_hot(output_domain, self.num_domains)
-            img.append(self.models["generator"](self._sample, output_domain))
+            img.append(self.models["generator"]([self._sample, output_domain]))
             
         img = np.concatenate([np.concatenate([i[j] for j in range(N)], 0)
                for i in img], 1)
