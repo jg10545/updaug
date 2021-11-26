@@ -12,12 +12,12 @@ def _build_encoder(num_channels=3):
     net = tf.keras.layers.Activation("relu")(net)
 
     # 64 layer
-    net = tf.keras.layers.Conv2D(64, 4, strides=2, padding="same")(inpt)
+    net = tf.keras.layers.Conv2D(64, 4, strides=2, padding="same")(net)
     net = InstanceNorm()(net)
     net = tf.keras.layers.Activation("relu")(net)
 
     # 128 layers
-    net = tf.keras.layers.Conv2D(128, 4, strides=2, padding="same")(inpt)
+    net = tf.keras.layers.Conv2D(128, 4, strides=2, padding="same")(net)
     net = InstanceNorm()(net)
     net = tf.keras.layers.Activation("relu")(net)
 
@@ -29,7 +29,7 @@ def _build_encoder(num_channels=3):
 def _build_decoder(num_channels=3):
     inpt = tf.keras.layers.Input((None, None, 128))
 
-    net = tf.keras.layers.Conv2D(64, 3, padding="same")
+    net = tf.keras.layers.Conv2D(64, 3, padding="same")(inpt)
     net = tf.keras.layers.LayerNormalization()(net)
     net = tf.keras.layers.Activation("relu")(net)
     net = tf.keras.layers.UpSampling2D(size=2)(net)
