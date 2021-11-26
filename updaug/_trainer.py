@@ -31,7 +31,7 @@ class Trainer(object):
     
     
     def __init__(self, logdir, traindata, trainlabels, 
-                 testdata, testlabels, steps_per_epoch,
+                 testdata, testlabels, 
                  crop=False, flip=True, rot=False,
                  imshape=(128,128), filetype="png",
                  batch_size=64, num_parallel_calls=6,
@@ -57,7 +57,8 @@ class Trainer(object):
         self.logdir = logdir
         self.imshape = imshape
         self.num_domains = np.max(trainlabels) + 1
-        pairs_per_epoch = steps_per_epoch * batch_size
+        pairs_per_epoch = len(traindata) - len(traindata)%batch_size
+        test_pairs_per_epoch = len(testdata)
         
         # ------- SET UP WRITER TO LOG TENSORBOARD METRICS -------
         if logdir is not None:
@@ -88,14 +89,14 @@ class Trainer(object):
                                         outputshape=imshape, filetype=filetype,
                                         batch_size=batch_size, crop=crop, flip=flip,
                                         rot=rot, seed=False) 
-        self.testds = dataset_generator(testdata, testlabels, pairs_per_epoch,
+        self.testds = dataset_generator(testdata, testlabels, test_pairs_per_epoch,
                                         num_parallel_calls=num_parallel_calls,
                                         outputshape=imshape, filetype=filetype,
                                         batch_size=batch_size, crop=crop, flip=False,
                                         rot=False, seed=1) 
         
         
-        # ------- SET UP GNERATOR TRAINING STEP -------
+        # ------- SET UP GENERATOR TRAINING STEP -------
         
         step_fn = _build_generator_training_step(self.models["generator"],
                                                  self.models["discriminator"],
@@ -111,7 +112,7 @@ class Trainer(object):
 
             return lossdict
         self.trainstep = training_step
-        
+        # ------- SET UP DISCRIMINATOR TRAINING STEP -------
         adv_fn = _build_discriminator_training_step(self.models["generator"], 
                                                     self.models["discriminator"],
                                                     self.adv_optimizer)
