@@ -140,7 +140,7 @@ class Trainer(object):
         for e in tqdm(range(epochs)):
             ds = next(self.ds_gen)
             ds = self.strat.experimental_distribute_dataset(ds)
-            for x0, y0, x1, y1 in self.ds:
+            for x0, y0, x1, y1 in ds:
                 if self.step % 2 == 0:
                     loss = self.trainstep(x0, y0, x1, y1)
                 else:
