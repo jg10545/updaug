@@ -103,7 +103,7 @@ class Trainer(object):
                                                  self.optimizer, lam1, lam2, lam3, lam4)    
         @tf.function
         def training_step(x0,y0,x1,y1):
-            per_example_losses = self.strategy.run(step_fn, args=(x0,y0,x1,y1))
+            per_example_losses = self.strat.run(step_fn, args=(x0,y0,x1,y1))
 
             lossdict = {k:self.strategy.reduce(
                     tf.distribute.ReduceOp.MEAN, 
@@ -118,7 +118,7 @@ class Trainer(object):
                                                     self.adv_optimizer)
         @tf.function
         def adv_training_step(x0,y0,x1,y1):
-            per_example_losses = self.strategy.run(adv_fn, args=(x0,y0,x1,y1))
+            per_example_losses = self.strat.run(adv_fn, args=(x0,y0,x1,y1))
 
             lossdict = {k:self.strategy.reduce(
                     tf.distribute.ReduceOp.MEAN, 
