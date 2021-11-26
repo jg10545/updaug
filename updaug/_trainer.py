@@ -35,7 +35,7 @@ class Trainer(object):
                  crop=False, flip=True, rot=False,
                  imshape=(128,128), filetype="png",
                  batch_size=64, num_parallel_calls=6,
-                 lr=1e-3, lr_decay=0, 
+                 lr=1e-4, lr_decay=0, 
                  lam1=1, lam2=10, lam3=10, lam4=100,
                  strategy=None):
         """
@@ -80,6 +80,7 @@ class Trainer(object):
                                                            t_mul=2., m_mul=1.,
                                                            alpha=0.)
             self.optimizer = tf.keras.optimizers.Adam(lr)
+            self.adv_optimizer = tf.keras.optimizers.Adam(lr)
         
         # ------- SET UP DATASETS -------
         self.ds_gen = dataset_generator(traindata, trainlabels, pairs_per_epoch,
@@ -94,14 +95,14 @@ class Trainer(object):
                                         rot=False, seed=1) 
         
         
-        # ------- SET UP TRAINING STEP -------
+        # ------- SET UP GNERATOR TRAINING STEP -------
         
         step_fn = _build_generator_training_step(self.models["generator"],
                                                  self.models["discriminator"],
                                                  self.optimizer, lam1, lam2, lam3, lam4)    
         @tf.function
-        def training_step(x,y):
-            per_example_losses = self.strategy.run(step_fn, args=(x,y))
+        def training_step(x0,y0,x1,y1):
+            per_example_losses = self.strategy.run(step_fn, args=(x0,y0,x1,y1))
 
             lossdict = {k:self.strategy.reduce(
                     tf.distribute.ReduceOp.MEAN, 
@@ -110,6 +111,21 @@ class Trainer(object):
 
             return lossdict
         self.trainstep = training_step
+        
+        adv_fn = _build_discriminator_training_step(self.models["generator"], 
+                                                    self.models["discriminator"],
+                                                    self.adv_optimizer)
+        @tf.function
+        def adv_training_step(x0,y0,x1,y1):
+            per_example_losses = self.strategy.run(adv_fn, args=(x0,y0,x1,y1))
+
+            lossdict = {k:self.strategy.reduce(
+                    tf.distribute.ReduceOp.MEAN, 
+                    per_example_losses[k], axis=None)
+                    for k in per_example_losses}
+
+            return lossdict
+        self.adv_trainstep = adv_training_step
         
                 # ------- GET SOME EXAMPLE IMAGES -------
         self._sample = _get_example_images(testdata, testlabels, imshape)
@@ -124,7 +140,10 @@ class Trainer(object):
             ds = next(self.ds_gen)
             ds = self.strategy.experimental_distribute_dataset(ds)
             for x0, y0, x1, y1 in self.ds:
-                loss = self.trainstep(x0, y0, x1, y1)
+                if self.step % 2 == 0:
+                    loss = self.trainstep(x0, y0, x1, y1)
+                else:
+                    loss = self.adv_trainstep(x0, y0, x1, y1)
                 self._record_scalars(loss=loss)
                 self.step += 1
             
