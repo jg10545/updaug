@@ -5,7 +5,6 @@ from updaug._layers import InstanceNorm, ResidualBlock, AdaptiveInstanceNormaliz
 
 
 def _build_encoder(num_domains, num_channels=3):
-    domain_inpt = tf.keras.layers.Input((num_domains), dtype=tf.int64)
     inpt = tf.keras.layers.Input((None, None, num_channels))
     # 32 layer
     net = tf.keras.layers.Conv2D(32, 3, strides=1, padding="same")(inpt)
