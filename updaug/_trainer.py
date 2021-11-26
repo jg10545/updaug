@@ -183,8 +183,8 @@ class Trainer(object):
             output_domain = tf.one_hot(output_domain, self.num_domains)
             img.append(self.models["generator"]([self._sample, output_domain]))
             
-        img = np.concatenate([np.concatenate([i[j] for j in range(N)], 0)
-               for i in img], 1)
+        img = np.expand_dims(np.concatenate([np.concatenate([i[j] for j in range(N)], 0)
+               for i in img], 1), 0)
         
         self._record_images(domain_reconstructions=img)
             
