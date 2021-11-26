@@ -29,15 +29,17 @@ def _build_encoder(num_channels=3):
 def _build_decoder(num_channels=3):
     inpt = tf.keras.layers.Input((None, None, 128))
 
-    net = tf.keras.layers.Conv2DTranspose(64, 1, strides=2, padding="same")(inpt)
+    net = tf.keras.layers.Conv2D(64, 3, padding="same")
     net = tf.keras.layers.LayerNormalization()(net)
     net = tf.keras.layers.Activation("relu")(net)
+    net = tf.keras.layers.UpSampling2D(size=2)(net)
 
-    net = tf.keras.layers.Conv2DTranspose(32, 1, strides=2, padding="same")(inpt)
+    net = tf.keras.layers.Conv2DTranspose(32, 3,  padding="same")(net)
     net = tf.keras.layers.LayerNormalization()(net)
     net = tf.keras.layers.Activation("relu")(net)
+    net = tf.keras.layers.UpSampling2D(size=2)(net)
 
-    net = tf.keras.layers.Conv2D(num_channels, 1, padding="same", activation="sigmoid")(net)
+    net = tf.keras.layers.Conv2D(num_channels, 3, padding="same", activation="sigmoid")(net)
     return tf.keras.Model(inpt, net)
 
 
