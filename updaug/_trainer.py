@@ -142,10 +142,10 @@ class Trainer(object):
             ds = self.strat.experimental_distribute_dataset(ds)
             for x0, y0, x1, y1 in ds:
                 if self.step % 2 == 0:
-                    loss = self.trainstep(x0, y0, x1, y1)
+                    lossdict = self.trainstep(x0, y0, x1, y1)
                 else:
-                    loss = self.adv_trainstep(x0, y0, x1, y1)
-                self._record_scalars(loss=loss)
+                    lossdict = self.adv_trainstep(x0, y0, x1, y1)
+                self._record_scalars(**lossdict)
                 self.step += 1
             
             self.evaluate()
