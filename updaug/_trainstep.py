@@ -70,10 +70,10 @@ def _build_discriminator_training_step(gen, disc, opt):
             disc_b_fake = tf.reduce_sum(disc(b_fake, training=True)*adom, -1)
             
             # -------------------- LOSSES --------------------
-            loss = tf.reduce_mean(tf.math.log(1-disc_a_fake)) + \
-                    tf.reduce_mean(tf.math.log(1-disc_b_fake)) - \
-                    tf.reduce_mean(tf.math.log(disc_a)) - \
-                    tf.reduce_mean(tf.math.log(disc_b))
+            loss = -1*(tf.reduce_mean(tf.math.log(1-disc_a_fake)) + \
+                    tf.reduce_mean(tf.math.log(1-disc_b_fake)) + \
+                    tf.reduce_mean(tf.math.log(disc_a)) + \
+                    tf.reduce_mean(tf.math.log(disc_b)))
             
         grads = tape.gradient(loss, gen.trainable_variables)
         opt.apply_gradients(zip(grads, gen.trainable_variables))
