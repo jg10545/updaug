@@ -4,7 +4,7 @@ import tensorflow as tf
 from updaug._layers import InstanceNorm, ResidualBlock, AdaptiveInstanceNormalization
 
 
-def _build_encoder(num_domains, num_channels=3):
+def _build_encoder(num_channels=3):
     inpt = tf.keras.layers.Input((None, None, num_channels))
     # 32 layer
     net = tf.keras.layers.Conv2D(32, 3, strides=1, padding="same")(inpt)
@@ -26,7 +26,7 @@ def _build_encoder(num_domains, num_channels=3):
         net = ResidualBlock(128)(net)
     return tf.keras.Model(inpt, net)
 
-def _build_decoder(num_domains, num_channels=3):
+def _build_decoder(num_channels=3):
     inpt = tf.keras.layers.Input((None, None, 128))
 
     net = tf.keras.layers.Conv2DTranspose(64, 1, strides=2, padding="same")(inpt)
@@ -45,13 +45,13 @@ def build_generator(num_domains, num_channels=3):
     """
     
     """
-    encoder = _build_encoder(num_domains, num_channels)
-    decoder = _build_decoder(num_domains, num_channels)
+    encoder = _build_encoder(num_channels)
+    decoder = _build_decoder(num_channels)
     anorm = AdaptiveInstanceNormalization(128, num_domains)
     
     
     inpt = tf.keras.layers.Input((None, None, num_channels))
-    domain_inpt = tf.keras.layers.Input((num_domains), dtype=tf.int64)
+    domain_inpt = tf.keras.layers.Input((num_domains,), dtype=tf.int64)
     net = encoder(inpt)
     net = anorm(net, domain_inpt)
     net = decoder(net)
