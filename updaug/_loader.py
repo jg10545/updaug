@@ -100,7 +100,7 @@ def dataset_generator(filepaths, labels, pairs_per_epoch, num_parallel_calls=6,
         ds = tf.data.Dataset.from_tensor_slices(pairs)
         ds = ds.map(_prep, num_parallel_calls=num_parallel_calls)
         ds = ds.batch(batch_size)
-        ds - ds.prefetch(1)
+        ds = ds.prefetch(1)
         yield ds
         
         
