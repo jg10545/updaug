@@ -89,11 +89,11 @@ class Trainer(object):
                                         outputshape=imshape, filetype=filetype,
                                         batch_size=batch_size, crop=crop, flip=flip,
                                         rot=rot, seed=False) 
-        self.testds = dataset_generator(testdata, testlabels, test_pairs_per_epoch,
+        self.testds = next(dataset_generator(testdata, testlabels, test_pairs_per_epoch,
                                         num_parallel_calls=num_parallel_calls,
                                         outputshape=imshape, filetype=filetype,
                                         batch_size=batch_size, crop=crop, flip=False,
-                                        rot=False, seed=1) 
+                                        rot=False, seed=1))
         self.testds = self.strat.experimental_distribute_dataset(self.testds)
         
         
