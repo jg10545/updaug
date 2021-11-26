@@ -66,8 +66,8 @@ def _build_discriminator_training_step(gen, disc, opt):
             disc_a = tf.reduce_sum(disc(a, training=True)*adom, -1)
             disc_b = tf.reduce_sum(disc(b, training=True)*bdom, -1)
             # run fake data through discriminator
-            disc_a_fake = tf.reduce_sum(disc(a_fake)*bdom, -1)
-            disc_b_fake = tf.reduce_sum(disc(b_fake)*adom, -1)
+            disc_a_fake = tf.reduce_sum(disc(a_fake, training=True)*bdom, -1)
+            disc_b_fake = tf.reduce_sum(disc(b_fake, training=True)*adom, -1)
             
             # -------------------- LOSSES --------------------
             loss = tf.reduce_mean(tf.math.log(1-disc_a_fake)) + \
