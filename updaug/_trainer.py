@@ -105,7 +105,7 @@ class Trainer(object):
         def training_step(x0,y0,x1,y1):
             per_example_losses = self.strat.run(step_fn, args=(x0,y0,x1,y1))
 
-            lossdict = {k:self.strategy.reduce(
+            lossdict = {k:self.strat.reduce(
                     tf.distribute.ReduceOp.MEAN, 
                     per_example_losses[k], axis=None)
                     for k in per_example_losses}
@@ -120,7 +120,7 @@ class Trainer(object):
         def adv_training_step(x0,y0,x1,y1):
             per_example_losses = self.strat.run(adv_fn, args=(x0,y0,x1,y1))
 
-            lossdict = {k:self.strategy.reduce(
+            lossdict = {k:self.strat.reduce(
                     tf.distribute.ReduceOp.MEAN, 
                     per_example_losses[k], axis=None)
                     for k in per_example_losses}
