@@ -94,6 +94,7 @@ class Trainer(object):
                                         outputshape=imshape, filetype=filetype,
                                         batch_size=batch_size, crop=crop, flip=False,
                                         rot=False, seed=1) 
+        self.testds = self.strat.experimental_distribute_dataset(self.ds)
         
         
         # ------- SET UP GENERATOR TRAINING STEP -------
