@@ -5,24 +5,24 @@ from updaug._layers import InstanceNorm, ResidualBlock, AdaptiveInstanceNormaliz
 
 
 def _build_encoder(num_channels=3):
-    print("instance norm replaced with layer norm")
+    print("instance norm removed")
     inpt = tf.keras.layers.Input((None, None, num_channels))
     # 32 layer
     net = tf.keras.layers.Conv2D(32, 3, strides=1, padding="same")(inpt)
     #net = InstanceNorm()(net)
-    net = tf.keras.layers.LayerNormalization()(net)
+    #net = tf.keras.layers.LayerNormalization()(net)
     net = tf.keras.layers.Activation("relu")(net)
 
     # 64 layer
     net = tf.keras.layers.Conv2D(64, 4, strides=2, padding="same")(net)
     #net = InstanceNorm()(net)
-    net = tf.keras.layers.LayerNormalization()(net)
+    #net = tf.keras.layers.LayerNormalization()(net)
     net = tf.keras.layers.Activation("relu")(net)
 
     # 128 layers
     net = tf.keras.layers.Conv2D(128, 4, strides=2, padding="same")(net)
     #net = InstanceNorm()(net)
-    net = tf.keras.layers.LayerNormalization()(net)
+    #net = tf.keras.layers.LayerNormalization()(net)
     net = tf.keras.layers.Activation("relu")(net)
 
     # residual blocks
