@@ -99,5 +99,5 @@ class AdaptiveInstanceNormalization(tf.keras.layers.Layer):
         domain = tf.cast(domain, tf.float32)
         gamma = tf.einsum('ij,jklm->iklm', domain, self.gamma) # [batch_size, 1, 1, k]
         beta = tf.einsum('ij,jklm->iklm', domain, self.beta) # [batch_size, 1, 1, k]
-        output = gamma*InstanceNorm()(inputs) + beta
+        output = gamma*InstanceNorm(scale=False, shift=False)(inputs) + beta
         return output
