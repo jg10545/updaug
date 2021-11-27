@@ -60,8 +60,8 @@ def build_generator(num_domains, num_channels=3):
     domain_inpt = tf.keras.layers.Input((num_domains,), dtype=tf.int64)
     net = encoder(inpt)
     #net = anorm(net, domain_inpt)
-    print("SHUNTING OUT ADAPTIVE INSTANCE NORM LAYER")
-    net = tf.keras.layers.Add()([net, 0*anorm(net, domain_inpt)])
+    #print("SHUNTING OUT ADAPTIVE INSTANCE NORM LAYER")
+    #net = tf.keras.layers.Add()([net, 0*anorm(net, domain_inpt)])
     net = decoder(net)
     return tf.keras.Model([inpt, domain_inpt], net)
 
