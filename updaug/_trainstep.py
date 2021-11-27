@@ -39,8 +39,9 @@ def _build_generator_training_step(gen, disc, opt, lam1=1, lam2=10, lam3=10, lam
             # edge loss
             L_edge = _edge_loss(a, a_fake) + _edge_loss(b, b_fake)
             
-            total_loss = lam1*L_G_adv + lam2*L_cross + lam3*L_self + lam4*L_edge
-            
+            #total_loss = lam1*L_G_adv + lam2*L_cross + lam3*L_self + lam4*L_edge
+            print("only optimizing on self loss!!")
+            total_loss = L_self
             
             
         grads = tape.gradient(total_loss, gen.trainable_variables)
