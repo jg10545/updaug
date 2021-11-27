@@ -73,7 +73,8 @@ def build_discriminator(num_domains, num_channels=3):
     net = tf.keras.layers.Conv2D(num_domains, 3)(net)
     # the global pooling layer isn't mentioned in the paper- without it
     # you get a rank-4 output though
-    net = tf.keras.layers.GlobalAveragePooling2D()(net)
+    #net = tf.keras.layers.GlobalAveragePooling2D()(net)
+    net = tf.keras.layers.GlobalMaxPool2D()(net)
     net = tf.keras.layers.Activation("sigmoid")(net)
     return tf.keras.Model(inpt, net)
 
