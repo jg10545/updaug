@@ -59,10 +59,12 @@ class ResidualBlock(tf.keras.layers.Layer):
         
         self.sublayers = [
             tf.keras.layers.Conv2D(k, kernel_size, padding="same"),
-            InstanceNorm(),
+            #InstanceNorm(),
+            keras.layers.LayerNormalization(),
             tf.keras.layers.Activation("relu"),
             tf.keras.layers.Conv2D(k, kernel_size, padding="same"),
-            InstanceNorm(),
+            #InstanceNorm(),
+            tf.keras.layers.LayerNormalization(),
             tf.keras.layers.Activation("relu"),
             tf.keras.layers.Add()
         ]
