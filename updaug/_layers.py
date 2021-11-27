@@ -9,11 +9,33 @@ class InstanceNorm(tf.keras.layers.Layer):
     Ulyanov et al. https://arxiv.org/pdf/1607.08022.pdf
     
     """
-    def __init__(self):
+    def __init__(self, scale=True, shift=True):
         super(InstanceNorm, self).__init__()
+
+        self._scale = scale
+        self._shift = shift
         
     def compute_output_shape(self, input_shape):
         return input_shape
+    
+    def build(self, input_shape):
+        num_channels = input_shape[-1]
+        
+        if self._scale:
+            self.gamma = self.add_weight(name="gamma",
+                                         shape = (1, 1, 1, num_channels),
+                                         initializer=tf.initializers.ones,
+                                         trainable=True)
+        else:
+            self.gamma = 1
+        if self._shift:
+            self.beta = self.add_weight(name="beta",
+                                         shape = (1, 1, 1, num_channels),
+                                         initializer=tf.initializers.zeros,
+                                         trainable=True)
+        else:
+            self.beta = 0
+            
 
     def call(self, inputs):
         assert len(inputs.shape) == 4, "instance normalization assumes input is a rank-4 tensor (N,H,W,C)"
@@ -21,7 +43,8 @@ class InstanceNorm(tf.keras.layers.Layer):
         
         mu = tf.reduce_mean(inputs, axis=[1,2], keepdims=True)
         sigsq = tf.reduce_mean((inputs-mu)**2, axis=[1,2], keepdims=True)
-        return (inputs-mu)/tf.math.sqrt(sigsq + eps)
+        x = (inputs-mu)/tf.math.sqrt(sigsq + eps)
+        return x*self.gamma + self.beta
     
     
 class ResidualBlock(tf.keras.layers.Layer):
