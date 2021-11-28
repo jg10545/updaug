@@ -8,6 +8,8 @@ class InstanceNorm(tf.keras.layers.Layer):
     Following equation 3 of "Instance Normalization: The Missing Ingredient for Fast Stylization" by
     Ulyanov et al. https://arxiv.org/pdf/1607.08022.pdf
     
+    Includes trainable parameters as described in the group normalization paper
+    
     """
     def __init__(self, scale=True, shift=True):
         super(InstanceNorm, self).__init__()
@@ -49,8 +51,7 @@ class InstanceNorm(tf.keras.layers.Layer):
     
 class ResidualBlock(tf.keras.layers.Layer):
     """
-
-    
+    Residual block using Instance Normalization
     """
     def __init__(self, k, kernel_size=3):
         super(ResidualBlock, self).__init__()
@@ -80,8 +81,7 @@ class ResidualBlock(tf.keras.layers.Layer):
     
 class AdaptiveInstanceNormalization(tf.keras.layers.Layer):
     """
-
-    
+    Adaptive Instance Normalization layer from the DAugNet paper
     """
     def __init__(self, k, num_domains):
         super(AdaptiveInstanceNormalization, self).__init__()

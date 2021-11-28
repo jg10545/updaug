@@ -39,7 +39,9 @@ def dataset_generator(filepaths, labels, pairs_per_epoch, num_parallel_calls=6,
                       outputshape=(128,128), filetype="png", batch_size=64,
                       crop=False, flip=True, rot=False, seed=False):
     """
-    Build a tensorflow dataset that generates pairs of distorted images
+    Build a generator that yields tensorflow datasets, each generating pairs of 
+    distorted images with corresponding domains.
+    
     :filepaths: list of strings; paths to all images
     :labels: list; domain labels for each file. assumes they're numbered 0 
         to num_domains-1
@@ -80,8 +82,8 @@ def dataset_generator(filepaths, labels, pairs_per_epoch, num_parallel_calls=6,
     def _prep(p):
         img0 = _load_and_distort(p["file0"])
         img1 = _load_and_distort(p["file1"])
-        return img0, tf.one_hot(p["label0"], num_domains), \
-            img1, tf.one_hot(p["label1"], num_domains)
+        return img0, tf.cast(tf.one_hot(p["label0"], num_domains), tf.float32), \
+            img1, tf.cast(tf.one_hot(p["label1"], num_domains), tf.float32)
     
     
     while True:
