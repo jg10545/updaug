@@ -221,7 +221,7 @@ class Trainer(object):
             return self.optimizer.lr
         # LR SCHEDULE CASE
         else:
-            return self._optimizer.lr(self.step)
+            return self.optimizer.lr(self.step)
             
         
     def __del__(self):
