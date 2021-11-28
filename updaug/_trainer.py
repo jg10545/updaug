@@ -57,7 +57,10 @@ class Trainer(object):
         :lr: learning rate for Adam optimizer
         :lr_decay: if above zero, use cosine decay with this many steps
         :lam1: lambda_1 parameter from paper; adversarial loss weight
-        :lam2:
+        :lam2: cross-domain loss weight
+        :lam3: "self" reconstruction loss weight
+        :lam4: edge loss weight
+        :strategy: tf.distribute strategy to use. if None, calls tf.distribute.get_strategy()
         """
         self.logdir = logdir
         self.imshape = imshape
