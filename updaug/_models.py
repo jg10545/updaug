@@ -5,24 +5,21 @@ from updaug._layers import InstanceNorm, ResidualBlock, AdaptiveInstanceNormaliz
 
 
 def _build_encoder(num_channels=3):
-    print("instance norm removed")
+    #print("instance norm removed")
     inpt = tf.keras.layers.Input((None, None, num_channels))
     # 32 layer
     net = tf.keras.layers.Conv2D(32, 3, strides=1, padding="same")(inpt)
-    #net = InstanceNorm()(net)
-    #net = tf.keras.layers.LayerNormalization()(net)
+    net = InstanceNorm()(net)
     net = tf.keras.layers.Activation("relu")(net)
 
     # 64 layer
     net = tf.keras.layers.Conv2D(64, 4, strides=2, padding="same")(net)
-    #net = InstanceNorm()(net)
-    #net = tf.keras.layers.LayerNormalization()(net)
+    net = InstanceNorm()(net)
     net = tf.keras.layers.Activation("relu")(net)
 
     # 128 layers
     net = tf.keras.layers.Conv2D(128, 4, strides=2, padding="same")(net)
-    #net = InstanceNorm()(net)
-    #net = tf.keras.layers.LayerNormalization()(net)
+    net = InstanceNorm()(net)
     net = tf.keras.layers.Activation("relu")(net)
 
     # residual blocks
@@ -59,9 +56,7 @@ def build_generator(num_domains, num_channels=3):
     inpt = tf.keras.layers.Input((None, None, num_channels))
     domain_inpt = tf.keras.layers.Input((num_domains,), dtype=tf.int64)
     net = encoder(inpt)
-    #net = anorm(net, domain_inpt)
-    #print("SHUNTING OUT ADAPTIVE INSTANCE NORM LAYER")
-    #net = tf.keras.layers.Add()([net, 0*anorm(net, domain_inpt)])
+    net = anorm(net, domain_inpt)
     net = decoder(net)
     return tf.keras.Model([inpt, domain_inpt], net)
 
@@ -79,7 +74,6 @@ def build_discriminator(num_domains, num_channels=3):
     net = tf.keras.layers.Conv2D(num_domains, 3)(net)
     # the global pooling layer isn't mentioned in the paper- without it
     # you get a rank-4 output though
-    #net = tf.keras.layers.GlobalAveragePooling2D()(net)
     net = tf.keras.layers.GlobalMaxPool2D()(net)
     net = tf.keras.layers.Activation("sigmoid")(net)
     return tf.keras.Model(inpt, net)
