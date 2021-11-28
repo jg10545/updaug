@@ -147,6 +147,7 @@ class Trainer(object):
                 else:
                     lossdict = self.adv_trainstep(x0, y0, x1, y1)
                 self._record_scalars(**lossdict)
+                self._record_scalars(learning_rate=self._get_current_learning_rate())
                 self.step += 1
             
             self.evaluate()
@@ -205,16 +206,6 @@ class Trainer(object):
         for h in hists:
             tf.summary.histogram(h, hists[h], step=self.step)
             
-        
-    def _get_current_learning_rate(self):
-        # return the current value of the learning rate
-        # CONSTANT LR CASE
-        if isinstance(self._optimizer.lr, tf.Variable) or isinstance(self._optimizer.lr, tf.Tensor):
-            return self._optimizer.lr
-        # LR SCHEDULE CASE
-        else:
-            return self._optimizer.lr(self.step)
-        
 
     
     def __call__(self, img):
@@ -222,6 +213,15 @@ class Trainer(object):
         nuthin here yet
         """
         pass
+    
+    def _get_current_learning_rate(self):
+        # return the current value of the learning rate
+        # CONSTANT LR CASE
+        if isinstance(self.optimizer.lr, tf.Variable) or isinstance(self.optimizer.lr, tf.Tensor):
+            return self.optimizer.lr
+        # LR SCHEDULE CASE
+        else:
+            return self._optimizer.lr(self.step)
             
         
     def __del__(self):
