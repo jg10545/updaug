@@ -27,6 +27,7 @@ def _get_example_images(testdata, testlabels, outputshape):
 
 class Trainer(object):
     """
+    Class for training unsupervised domain augmentation networks
     """
     
     
@@ -41,18 +42,22 @@ class Trainer(object):
         """
         :logdir: (string) path to log directory
         :traindata: list of strings; paths to each image in the dataset
-        :trainlabels
+        :trainlabels list of ints; domain of each training image
         :testdata: list of strings; a batch of images to use for out-of-sample
-            visualization in tensorboard
-        :testlabels:
+            test and visualization in tensorboard
+        :testlabels: list of ints; domain of each test image
+        :crop: bool; if True, take random crops from training images instead of resizing
+        :flip: bool; if True, augment during training with left-right random flips
+        :rot: bool; if True, augment with random 90 degree rotations during training. Images
+            must be square for this to work!
         :imshape: image shape to use
-        :batch_size: batch size for traniing
+        :filetype: str; "png" or "jpg"
+        :batch_size: batch size for training
         :num_parallel_calls: number of cores to use for loading/preprocessing images
         :lr: learning rate for Adam optimizer
-        :lr_decay:
-        :weights: list of 6 floats- weights to use for each perceptual loss
-            component. See paper for details.
-        :weightdecay: L2 loss applied to model weights
+        :lr_decay: if above zero, use cosine decay with this many steps
+        :lam1: lambda_1 parameter from paper; adversarial loss weight
+        :lam2:
         """
         self.logdir = logdir
         self.imshape = imshape
@@ -137,6 +142,7 @@ class Trainer(object):
     
     def fit(self, epochs=1, save=True):
         """
+        Train both generator and discriminator
         """
         for e in tqdm(range(epochs)):
             ds = next(self.ds_gen)
@@ -221,7 +227,7 @@ class Trainer(object):
             return self.optimizer.lr
         # LR SCHEDULE CASE
         else:
-            return self._optimizer.lr(self.step)
+            return self.optimizer.lr(self.step)
             
         
     def __del__(self):
