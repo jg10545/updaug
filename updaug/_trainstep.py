@@ -7,7 +7,6 @@ from updaug._loss import _l1_loss, _edge_loss
 def _build_generator_training_step(gen, disc, opt, lam1=1, lam2=10, lam3=10, lam4=100):
     #@tf.function
     def trainstep(a, adom, b, bdom):
-        lossdict = {}
         # a, b: [batch_size, H, W, num_channels]
         # adom, bdom: [batch_size, num_domains]
         with tf.GradientTape() as tape:
@@ -50,17 +49,14 @@ def _build_generator_training_step(gen, disc, opt, lam1=1, lam2=10, lam3=10, lam
 
 
 def _build_discriminator_training_step(gen, disc, opt):
-    @tf.function
     def trainstep(a, adom, b, bdom):
-        lossdict = {}
         # a, b: [batch_size, H, W, num_channels]
         # adom, bdom: [batch_size, num_domains]
+        # map each training point to a different domain
+        # e.g. run in domain-transfer mode
+        a_fake = gen([a, bdom])
+        b_fake = gen([b, adom])
         with tf.GradientTape() as tape:
-            # map each training point to a different domain
-            # e.g. run in domain-transfer mode
-            a_fake = gen([a, bdom])
-            b_fake = gen([b, adom])
-            
             # run real data through discriminator
             disc_a = tf.reduce_sum(disc(a, training=True)*adom, -1)
             disc_b = tf.reduce_sum(disc(b, training=True)*bdom, -1)
@@ -74,7 +70,7 @@ def _build_discriminator_training_step(gen, disc, opt):
                     tf.reduce_mean(tf.math.log(disc_a)) + \
                     tf.reduce_mean(tf.math.log(disc_b)))
             
-        grads = tape.gradient(loss, gen.trainable_variables)
-        opt.apply_gradients(zip(grads, gen.trainable_variables))
+        grads = tape.gradient(loss, disc.trainable_variables)
+        opt.apply_gradients(zip(grads, disc.trainable_variables))
         return {"disc_loss":loss}
     return trainstep
