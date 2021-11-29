@@ -69,7 +69,7 @@ def dataset_generator(filepaths, labels, pairs_per_epoch, num_parallel_calls=6,
         else:
             assert False, "don't know this file type"
         if crop:
-            resized = tf.image.random_crop(decoded, outputshape)
+            resized = tf.image.random_crop(decoded, [outputshape[0], outputshape[1], 3])
         else:
             resized = tf.image.resize(decoded, outputshape)
         if flip:
