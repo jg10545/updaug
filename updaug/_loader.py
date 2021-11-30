@@ -65,7 +65,7 @@ def dataset_generator(filepaths, labels, pairs_per_epoch, num_parallel_calls=6,
         if filetype == "png":
             decoded = tf.io.decode_png(loaded)
         elif filetype == "jpg":
-            decoded = tf.io.decode_jpeg(loaded)
+            decoded = tf.io.decode_jpeg(loaded, try_recover_truncated=True)
         else:
             assert False, "don't know this file type"
         if crop:

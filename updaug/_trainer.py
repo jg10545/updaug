@@ -38,7 +38,7 @@ class Trainer(object):
                  batch_size=64, num_parallel_calls=6,
                  lr=1e-4, lr_decay=0, 
                  lam1=1, lam2=10, lam3=10, lam4=100,
-                 strategy=None):
+                 strategy=None, scale_epochs_by=1):
         """
         :logdir: (string) path to log directory
         :traindata: list of strings; paths to each image in the dataset
@@ -61,11 +61,13 @@ class Trainer(object):
         :lam3: "self" reconstruction loss weight
         :lam4: edge loss weight
         :strategy: tf.distribute strategy to use. if None, calls tf.distribute.get_strategy()
+        :scale_epochs_by: multiply the length of an epoch by this factor. so if you set it to
+            0.5, the evaluate() method will be called twice as often during training.
         """
         self.logdir = logdir
         self.imshape = imshape
         self.num_domains = np.max(trainlabels) + 1
-        pairs_per_epoch = len(traindata) - len(traindata)%batch_size
+        pairs_per_epoch = int((len(traindata) - len(traindata)%batch_size)*scale_epochs_by)
         test_pairs_per_epoch = len(testdata)
         
         # ------- SET UP WRITER TO LOG TENSORBOARD METRICS -------
@@ -102,7 +104,6 @@ class Trainer(object):
                                         outputshape=imshape, filetype=filetype,
                                         batch_size=batch_size, crop=crop, flip=False,
                                         rot=False, seed=1))
-        self.testds = self.strat.experimental_distribute_dataset(self.testds)
         
         
         # ------- SET UP GENERATOR TRAINING STEP -------
