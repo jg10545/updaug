@@ -18,7 +18,8 @@ def _get_example_images(testdata, testlabels, outputshape):
     samples = []
     for d in range(num_domains):
         subset = df[df.label == d]
-        img = Image.open(subset.filepath.values[0]).resize(outputshape)
+        # PIL takes resize dimensionw as (W,H)
+        img = Image.open(subset.filepath.values[0]).resize([outputshape[1]], outputshape[0])
         samples.append(np.array(img).astype(np.float32)/255)
     
     samples = np.stack(samples, 0)
